@@ -1,0 +1,58 @@
+
+import requests #Import required libraries
+import pandas as pd
+import json
+
+api_url="http://127.0.0.1:5000/data"
+
+def get_number_of_jobs_T(technology):
+    number_of_jobs = 0
+    payload={"Key Skills":technology}
+    response=requests.get(api_url,params=payload)
+    if response.ok:             
+        data2 = response.json()
+        number_of_jobs += len(data2)
+    else:
+        number_of_jobs = None
+    return technology, number_of_jobs
+
+get_number_of_jobs_T('Python')
+
+def get_number_of_jobs_L(location):
+    number_of_jobs = 0
+    payload={"Location":location}
+    response=requests.get(api_url,params=payload)
+    if response.ok:             
+        data2 = response.json()
+        number_of_jobs += len(data2)
+    else:
+        number_of_jobs = None
+    return location, number_of_jobs
+
+get_number_of_jobs_L('Los Angeles')
+
+!pip install openpyxl
+from openpyxl import Workbook
+wb=Workbook()
+ws=wb.active
+
+locations=['Los Angeles',
+'New York',
+'San Francisco',
+'Washington DC',
+'Seattle',
+'Austin',
+'Detroit']
+for loc in locations:
+    ws.append(get_number_of_jobs_L(loc))
+
+wb.save("github-job-postings-loc.xlsx")
+
+technologies = ['C',
+                'C%23',
+                'C%2B%2B','Java','JavaScript','Python','Scala','Oracle','SQL Server','MySQL Server','PostgreSQL','MongoDB']
+for tech in technologies:
+    ws.append(get_number_of_jobs_T(tech))
+wb.save("github-job-postings-tech.xlsx")
+
+
