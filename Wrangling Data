@@ -1,0 +1,62 @@
+
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/LargeData/m1_survey_data.csv")
+
+#Find how many duplicate rows exist in the dataframe.
+df.duplicated().sum()
+
+#Remove the duplicate rows from the dataframe.
+df.drop_duplicates(keep=False, inplace=True)
+
+#Verify if duplicates were actually dropped.
+df.duplicated().sum()
+
+#Find the missing values for all columns.
+df.isnull().sum()
+
+#Find out how many rows are missing in the column 'WorkLoc'
+df['WorkLoc'].isnull().sum()
+
+#Find the value counts for the column WorkLoc.
+df['WorkLoc'].value_counts()
+
+#make a note of the majority value here, for future reference
+#Office has the most, followed by Home, and then last place is Other place, such as a coworking space or cafe
+
+#Impute (replace) all the empty rows in the column WorkLoc with the value that you have identified as majority.
+df['WorkLoc'].replace(np.nan, 'Office',inplace=True)
+df['WorkLoc'].value_counts()
+
+#Verify if imputing was successful.
+df['WorkLoc'].isnull().sum()
+
+## Normalizing data
+
+#List out the various categories in the column 'CompFreq'
+df['CompFreq']
+df['CompTotal']
+Categories=pd.get_dummies(df['CompFreq'])
+Categories
+
+#Create a new column named 'NormalizedAnnualCompensation'. Use the hint given below if needed.
+print(df['CompFreq'].isnull().sum())
+print(df['CompTotal'].isnull().sum())
+df['CompTotal'].median()
+df['CompFreq'].value_counts().idxmax()
+df['CompTotal'].replace(np.nan,65000.0, inplace=True)
+df['CompFreq'].replace(np.nan,'Yearly', inplace=True)
+def normalizedac(freq, comp):
+    yearly = 0
+    if freq == 'Monthly':
+        yearly = comp *12
+    elif freq== 'Weekly':
+        yearly = comp*52
+    elif freq == 'Yearly':
+        yearly = comp
+    return yearly
+annual = [normalizedac(freq, comp) for freq, comp in zip(df['CompFreq'],df['CompTotal'])]
+df['NormalizedAnnualCompensation'] = annual
+df.shape
+
