@@ -1,0 +1,23 @@
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/labs/datasets/Programming_Languages.html"
+
+data = requests.get(url).text
+soup = BeautifulSoup(data,"html.parser")
+table = soup.find('table')
+List = {}
+for row in table.find_all('tr'):
+    Col=row.find_all('td')
+    Language_name=Col[1].get_text()
+    annual_average_salary=Col[3].get_text()
+    List[Language_name]=annual_average_salary
+    
+print(List)
+
+List=[List]
+List_frame=pd.DataFrame(List)
+List_frame.to_csv('popular_languages.csv')
+
