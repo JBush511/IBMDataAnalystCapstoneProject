@@ -1,0 +1,20 @@
+#Loaded Dataset onto a pandas DataFrame for exploration
+
+import pandas as pd
+
+dataset_url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/LargeData/m1_survey_data.csv"
+df=pd.read_csv(dataset_url)
+df
+
+#Display the top 5 rows and columns from your dataset.
+df.head(5)
+#Print the number of rows in the dataset.
+print(len(df))
+#Print the number of columns in the dataset.
+print(len(df.columns))
+#Print the datatype of all columns.
+print(df.columns.dtype)
+#Print the mean age of the survey participants.
+df['Age'].mean()
+#The dataset is the result of a world wide survey. Print how many unique countries are there in the Country column.
+df['Country'].nunique()
