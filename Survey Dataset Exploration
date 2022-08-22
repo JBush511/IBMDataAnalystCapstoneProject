@@ -13,7 +13,7 @@ print(len(df))
 #Print the number of columns in the dataset.
 print(len(df.columns))
 #Print the datatype of all columns.
-print(df.columns.dtype)
+df.info()
 #Print the mean age of the survey participants.
 df['Age'].mean()
 #The dataset is the result of a world wide survey. Print how many unique countries are there in the Country column.
