@@ -1,0 +1,167 @@
+!wget https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/LargeData/m4_survey_data.sqlite
+
+import sqlite3
+conn = sqlite3.connect("m4_survey_data.sqlite") # open a database connection
+import pandas as pd
+import numpy as np
+
+# print how many rows are there in the table named 'master'
+QUERY = """
+SELECT COUNT(*)
+FROM master
+"""
+# the read_sql_query runs the sql query and returns the data as a dataframe
+df = pd.read_sql_query(QUERY,conn)
+df.head()
+
+# print all the tables names in the database
+QUERY = """
+SELECT name as Table_Name FROM
+sqlite_master WHERE
+type = 'table'
+"""
+# the read_sql_query runs the sql query and returns the data as a dataframe
+pd.read_sql_query(QUERY,conn)
+
+#developer type ranked
+QUERY = """
+SELECT * FROM DevType
+"""
+dt=pd.read_sql_query(QUERY, conn)
+dt['DevType'].value_counts()
+
+#languages worked with ranked
+QUERY = """
+select * from LanguageWorkedWith 
+"""
+lww=pd.read_sql_query(QUERY,conn)
+lww['LanguageWorkedWith'].value_counts()
+
+#Mysql only count by developers
+QUERY = """
+select * from DatabaseWorkedWith 
+"""
+dww=pd.read_sql_query(QUERY,conn)
+dww2 = dww.groupby('Respondent').sum()
+dww3=dww2[dww2['DatabaseWorkedWith']=='MySQL'].count()
+dww3
+
+#How to run a group query
+QUERY = """
+SELECT Age,COUNT(*) as count
+FROM master
+group by age
+order by age
+"""
+pd.read_sql_query(QUERY,conn)
+
+#How to describe a table
+table_name = 'master'  # the table you wish to describe
+QUERY = """
+SELECT sql FROM sqlite_master
+WHERE name= '{}'
+""".format(table_name)
+df = pd.read_sql_query(QUERY,conn)
+print(df.iat[0,0])
+
+QUERY = """
+SELECT *
+FROM master
+"""
+# the read_sql_query runs the sql query and returns the data as a dataframe
+dff = pd.read_sql_query(QUERY,conn)
+dff.head()
+
+#Plot a histogram of `ConvertedComp.`
+import seaborn as sns
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+import io
+!pip install -U seaborn
+
+sns.histplot(data=dff['ConvertedComp'])
+#boxplot
+sns.boxplot(data=dff['ConvertedComp'])
+
+#plot a box plot of 'Age'
+dff['Age'].sort_values().drop_duplicates()
+dff['Age'].plot.box(vert=False)
+sns.boxplot(data=dff['Age'])
+dff['Age'].describe()
+
+#Create a scatter plot of `Age` and `WorkWeekHrs.`
+QUERY = """
+SELECT Age, WorkWeekHrs FROM master
+"""
+dfaw=pd.read_sql_query(QUERY,conn)
+dfaw.set_index('Age', inplace=True)
+sns.scatterplot(data=dfaw, legend=None)
+plt.ylabel('WorkWeekHrs')
+plt.xlabel('Age')
+plt.show()
+dfaw.plot.scatter(x='Age',y='WorkWeekHrs')
+dff[['Age','WorkWeekHrs']].corr()
+
+#Create a bubble plot of WorkWeekHrs and CodeRevHrs, use Age column as bubble size.
+Age=dff['Age']
+dfbb=dff['Age'].transpose()
+dfbb.index=map(int, dfbb.index)
+dfbb.index.name='Age'
+dfbb.head()
+
+ax0 = sns.scatterplot(x=(dff['Age']),y=(dff['WorkWeekHrs']))
+ax1 = sns.scatterplot(x=(dff['Age']),y=(dff['CodeRevHrs']))
+ax0.set_ylabel('Hours')
+ax1.set_xlabel('Age')
+ax0.legend(['WorkWeekHrs','CodeRevHrs'],loc='upper right')
+dff.plot(kind='scatter', x = 'WorkWeekHrs', y = 'CodeRevHrs', s = 'Age', figsize = (10, 6), color = 'green')
+
+#Create a pie chart of the top 5 databases that respondents wish to learn next year. Label 
+#the pie chart with database names. Display percentages of each database on the pie chart.
+QUERY = """
+select count(DatabaseDesireNextYear) as Count,DatabaseDesireNextYear FROM DatabaseDesireNextYear GROUP BY DatabaseDesireNextYear ORDER BY count(DatabaseDesireNextYear) DESC LIMIT 5
+"""
+tfd=pd.read_sql_query(QUERY,conn)
+tfd
+my_label = tfd['DatabaseDesireNextYear']
+explode_list= [0.1,0.1,0.1,0.1,0.1]
+sizes = tfd.iloc [:,0]
+plt.pie(sizes, labels=None, startangle=90, shadow=True, autopct='%1.1f%%', explode=explode_list)
+plt.title('Top 5 DataBases')
+plt.legend(loc=[1,1], labels=my_label)
+plt.show()
+
+#Create a stacked chart of median WorkWeekHrs and CodeRevHrs for the age group 30 to 35.
+dff
+dff2=dff[['Age','WorkWeekHrs','CodeRevHrs']].sort_values('Age')
+order = ['WorkWeekHrs', 'CodeRevHrs']
+dff2=dff2.groupby('Age')[order].median()
+dff2
+dff3=dff2.loc[30:35]
+dff3
+dff3.plot.bar(stacked=True)
+
+#Plot the median ConvertedComp for all ages from 45 to 60.
+df2=dff[['ConvertedComp','Age']].sort_values('Age')
+df2
+df3=df2.set_index('Age')
+df3
+df4=df3.groupby('Age')['ConvertedComp'].median()
+df4
+df5=df4.loc[45:60]
+df5
+df5.plot(kind='line', x='age',y='ConvertedComp', figsize = (10, 6), color = 'blue')
+#range from 25 to 30
+df6=df4.loc[25:30]
+df6
+df6.plot(kind='line', x='age',y='ConvertedComp', figsize = (10, 6), color = 'blue')
+
+#Create a horizontal bar chart using column MainBranch.
+dffc=dff['MainBranch'].value_counts()
+dffc
+dffc.plot.barh(color="red")
+
+conn.close()
+
