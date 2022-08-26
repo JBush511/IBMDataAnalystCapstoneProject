@@ -1,0 +1,84 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+
+df = pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DA0321EN-SkillsNetwork/LargeData/m2_survey_data.csv")
+
+%matplotlib inline
+from matplotlib import pyplot
+!pip install -U seaborn
+
+
+#Plot the distribution curve for the column `ConvertedComp'
+import matplotlib.pyplot as plt
+df['ConvertedComp'].median()
+df['ConvertedComp'].describe()
+df['ConvertedComp']
+df['ConvertedComp'].replace(np.nan,57745.0,inplace=True)
+axl=sns.distplot(df['ConvertedComp'], hist=False, color='r', label='Converted Compensation')
+
+#Plot the histogram for the column ConvertedComp
+axl2=sns.distplot(df['ConvertedComp'], hist=True, color='b', label='Converted Compensation')
+
+#What is the median of the column ConvertedComp?
+df['ConvertedComp'].median()
+df['Gender'].value_counts()
+
+#Find out the median ConvertedComp of responders identified themselves only as a Woman?
+df3=df.loc[df['ConvertedComp'] == 57745.0, 'Gender']
+print((df3).value_counts())
+
+#Give the five number summary for the column Age?
+df['Age'].describe()
+df['Age'].median()
+adf=df['Age']
+sns.histplot(data=adf,x=df['Age'])
+plt.xlim(15,40)
+
+#boxplot
+sns.boxplot(data=df['Age'])
+
+#Find out if outliers exist in the column ConvertedComp using a box plot?
+sns.boxplot(data=df['ConvertedComp'])
+df['ConvertedComp']
+Q1 = df['ConvertedComp'].quantile(0.25)
+Q3 = df['ConvertedComp'].quantile(0.75)
+IQR = Q3 - Q1
+((df['ConvertedComp'] < (Q1 - 1.5 * IQR)) | (df['ConvertedComp'] > (Q3 + 1.5 * IQR))).sum()
+
+#Find out the Inter Quartile Range for the column ConvertedComp
+q3, q1 = np.percentile((df['ConvertedComp']), [75, 25])
+iqr = q3-q1
+iqr
+df['ConvertedComp'].describe()
+iqr2 = (9.500000e+04)-(2.901600e+04)
+iqr2
+
+#Find out the upper and lower bounds.
+# your code goes here
+upper = (q3 + 1.5 * iqr)
+lower = (q1 - 1.5 * iqr)
+print("Upper bound:", upper)
+print("Lower bound:", lower)
+
+#Identify how many outliers are there in the `ConvertedComp` column.
+Q1 = df['ConvertedComp'].quantile(0.25)
+Q3 = df['ConvertedComp'].quantile(0.75)
+IQR = Q3 - Q1
+((df['ConvertedComp'] < (Q1 - 1.5 * IQR)) | (df['ConvertedComp'] > (Q3 + 1.5 * IQR))).sum()
+
+#Create a new dataframe by removing the outliers from the ConvertedComp column.
+df['ConvertedComp']
+df2=df['ConvertedComp'].clip(upper, lower, axis=0)
+df2.replace(np.nan,57745.0,inplace=True)
+df2
+sns.boxplot(df2)
+Q11 = df2.quantile(0.25)
+Q33 = df2.quantile(0.75)
+IQRr = Q33 - Q11
+df2=((df2 > (Q11 - 1.5 * IQRr)) | (df2 < (Q33 + 1.5 * IQRr))).sum()
+df2
+
+#Find the correlation between Age and all other numerical columns.
+df.corr()
+
